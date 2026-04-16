@@ -10,6 +10,7 @@ import UserDashboard from "./pages/dashboards/UserDashboard";
 import ManagerDashboard from "./pages/dashboards/ManagerDashboard";
 import ManagerUsers from "./pages/manager/ManagerUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Home from "./pages/Home";
 
 function App() {
   const appRouter = createBrowserRouter([
@@ -22,6 +23,11 @@ function App() {
       path: "/signup",
       element: <Signup />,
     },
+
+    {
+  path: "/",
+  element: <Home />,
+}
 
     // 🔐 Admin Routes
     {
