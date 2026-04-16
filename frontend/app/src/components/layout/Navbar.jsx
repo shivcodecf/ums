@@ -5,6 +5,10 @@ const Navbar = ({ title }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const API_URL = `${BASE_URL}/api/auth/logout`;
+
   const handleHomeClick = () => {
     const path = location.pathname; // e.g. "/admin/create"
 
@@ -18,7 +22,7 @@ const Navbar = ({ title }) => {
     localStorage.removeItem("token");
 
     const res = await axios.post(
-      `http://localhost:1080/api/auth/logout`,
+      `${API_URL}`,
       {},
       {
         withCredentials: true,
