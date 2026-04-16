@@ -114,7 +114,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       await axios.put(
-        `${API_BASE_URL}/profile/user/update`,
+        `${API_URL}/profile/user/update`,
         formData,
         { withCredentials: true }
       );
