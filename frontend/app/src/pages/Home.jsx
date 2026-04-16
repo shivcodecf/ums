@@ -8,7 +8,7 @@ const Home = () => {
       
       {/* Navbar */}
       <div className="flex justify-between items-center px-8 py-4 bg-white shadow">
-        <h1 className="text-xl font-bold text-indigo-600">Ums</h1>
+        <h1 className="text-xl font-bold text-indigo-600">UMS</h1>
         <div className="space-x-4">
           <button
             onClick={() => navigate("/login")}
