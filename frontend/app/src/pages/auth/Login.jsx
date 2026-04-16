@@ -8,6 +8,10 @@ const Login = () => {
 
   const navigate = useNavigate();
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const API_URL = `${BASE_URL}/api/auth/login`;
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -15,16 +19,21 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await axios.post(
-        `http://localhost:1080/api/auth/login`,
-        form,
-        {
-          withCredentials: true,
-        },
-      );
+      const res = await axios.post(`${API_URL}`, form, {
+        withCredentials: true,
+      });
 
-      localStorage.setItem("token", res.data.token);
-      alert("Login Successful!");
+      if (res.data.success) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            role: res.data.user.role,
+            id: res.data.user._id,
+          }),
+        );
+        alert("Login Successful!");
+      }
+
       // window.location.href = "/dashboard";
 
       if (res.data.user.role == "admin") {

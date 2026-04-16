@@ -26,6 +26,8 @@ const Navbar = ({ title }) => {
     );
 
     if (res.data.success) {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
       alert("logout successfully");
       navigate("/login");
     }

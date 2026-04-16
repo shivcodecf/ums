@@ -17,8 +17,10 @@ const UserDashboard = () => {
     password: "",
   });
 
-  const API_URL = "http://localhost:1080/api/profile/user";
-  const UPDATE_API_URL = "http://localhost:1080/api/profile/user/update";
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const API_URL = `${BASE_URL}/api/profile/user`;
+  const UPDATE_API_URL = `${BASE_URL}/api/profile/user/update`;
 
   // Fetch user profile
   const fetchUserProfile = async () => {
@@ -76,7 +78,7 @@ const UserDashboard = () => {
 
     try {
       await axios.put(UPDATE_API_URL, formData, {
-        withCredentials: true,
+        withCredentials: true
       });
 
       alert("Profile updated successfully!");
@@ -114,10 +116,10 @@ const UserDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ProfileItem label="Name" value={user.name} />
               <ProfileItem label="Email" value={user.email} />
-              <ProfileItem label="Role" value={capitalize(user.role)} />
+              <ProfileItem label="Role" value={(user.role)} />
               <ProfileItem
                 label="Status"
-                value={capitalize(user.status || "active")}
+                value={(user.status || "active")}
               />
               <ProfileItem
                 label="Account Created"

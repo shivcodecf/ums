@@ -18,13 +18,15 @@ const ManagerDashboard = () => {
     password: "",
   });
 
-  const API_BASE_URL = "http://localhost:1080/api";
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const API_URL = `${BASE_URL}/api`;
 
   // Fetch Manager Profile
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_BASE_URL}/profile/user`, {
+      const res = await axios.get(`${API_URL}/profile/user`, {
         withCredentials: true,
       });
 
@@ -66,7 +68,7 @@ const ManagerDashboard = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${API_BASE_URL}/profile/user/update`, formData, {
+      await axios.put(`${API_URL}/profile/user/update`, formData, {
         withCredentials: true,
       });
 

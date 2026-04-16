@@ -22,10 +22,10 @@ export const protect = (req, res, next) => {
 
     req.user = decoded;
 
-    next(); // ✅ fixed
+    next(); 
   } catch (error) {
     return res.status(401).json({
-      // 🔥 better than 500
+    
       success: false,
       message: "Unauthorized",
     });

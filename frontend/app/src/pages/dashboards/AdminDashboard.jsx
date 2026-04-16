@@ -35,14 +35,18 @@ const AdminDashboard = () => {
     password: "",
   });
 
-  const API_BASE_URL = "http://localhost:1080/api";
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const API_URL = `${BASE_URL}/api`;
+
+  // const API_BASE_URL = "http://localhost:1080/api";
 
   /* ---------------- Fetch Dashboard Stats ---------------- */
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/profile/admin`,
+          `${API_URL}/profile/admin`,
           { withCredentials: true }
         );
 
@@ -79,7 +83,7 @@ const AdminDashboard = () => {
   /* ---------------- Fetch Admin Profile ---------------- */
   const fetchAdminProfile = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/profile/user`, {
+      const res = await axios.get(`${API_URL}/profile/user`, {
         withCredentials: true,
       });
 

@@ -9,10 +9,11 @@ import CreateUser from "./pages/admin/CreateUser";
 import UserDashboard from "./pages/dashboards/UserDashboard";
 import ManagerDashboard from "./pages/dashboards/ManagerDashboard";
 import ManagerUsers from "./pages/manager/ManagerUsers";
-
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const appRouter = createBrowserRouter([
+    // 🔓 Public Routes
     {
       path: "/login",
       element: <Login />,
@@ -21,30 +22,60 @@ function App() {
       path: "/signup",
       element: <Signup />,
     },
-     {
+
+    // 🔐 Admin Routes
+    {
       path: "/admin",
-      element: <AdminDashboard />,
+      element: (
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <AdminDashboard />
+        </ProtectedRoute>
+      ),
     },
-     {
+    {
       path: "/admin/users",
-      element: <AdminUsers />,
+      element: (
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <AdminUsers />
+        </ProtectedRoute>
+      ),
     },
-     {
+    {
       path: "/admin/create-user",
-      element: <CreateUser />,
+      element: (
+        <ProtectedRoute allowedRoles={["admin"]}>
+          <CreateUser />
+        </ProtectedRoute>
+      ),
     },
-     {
+
+    // 🔐 User Routes
+    {
       path: "/user",
-      element: <UserDashboard/>
+      element: (
+        <ProtectedRoute allowedRoles={["user"]}>
+          <UserDashboard />
+        </ProtectedRoute>
+      ),
     },
-      {
+
+    // 🔐 Manager Routes
+    {
       path: "/manager",
-      element: <ManagerDashboard/>
+      element: (
+        <ProtectedRoute allowedRoles={["manager"]}>
+          <ManagerDashboard />
+        </ProtectedRoute>
+      ),
     },
-      {
+    {
       path: "/manager/users",
-      element: <ManagerUsers/>
-    }
+      element: (
+        <ProtectedRoute allowedRoles={["manager"]}>
+          <ManagerUsers />
+        </ProtectedRoute>
+      ),
+    },
   ]);
 
   return (

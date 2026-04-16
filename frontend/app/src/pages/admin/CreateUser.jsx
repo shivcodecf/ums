@@ -20,7 +20,9 @@ const CreateUser = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const API_URL = `http://localhost:1080/api/profile/admin/create`;
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const API_URL = `${BASE_URL}/api/profile/admin/create`;
 
   // Generate a random password
   const generatePassword = () => {

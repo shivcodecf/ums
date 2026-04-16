@@ -1,58 +1,78 @@
 import { User } from "../models/user.model.js";
-
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/generateToken.js";
 import { generateCookie } from "../utils/generateCookie.js";
 
+
+const sanitizeUser = (user) => {
+  const { password, __v, ...userData } = user.toObject();
+  return userData;
+};
+
+
+const isValidEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+
+
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    
+    email = email?.trim().toLowerCase();
+    password = password?.trim();
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "all fields are required!",
+        message: "All fields are required!",
+      });
+    }
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
       });
     }
 
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(400).json({
+    
+    const isMatch = user
+      ? await bcrypt.compare(password, user.password)
+      : false;
+
+    if (!user || !isMatch) {
+      return res.status(401).json({
         success: false,
-        message: "invalid EmailId or password",
+        message: "Invalid email or password",
       });
     }
 
-    // const checkStatus = await User.findOne({ status: "inactive" });
-
-    if (user.status == "inactive") {
-      return res.status(400).json({
+    if (user.status === "inactive") {
+      return res.status(403).json({
         success: false,
         message: "User is inactive",
       });
     }
 
-    const comparePassword = await bcrypt.compare(password, user.password);
-
-    if (!comparePassword) {
-      return res.status(400).json({
-        success: false,
-        message: "invalid emailId or Password",
-      });
-    }
-
-    const token = generateToken({ id: user._id, role: user.role });
+    const token = generateToken({
+      id: user._id,
+      role: user.role,
+    });
 
     generateCookie(res, token);
 
     return res.status(200).json({
-      user,
       success: true,
-      message: "user login successfully",
+      user: sanitizeUser(user),
+      message: "User login successful",
     });
   } catch (error) {
-    console.error(error);
+    console.error("LOGIN ERROR:", error);
 
     return res.status(500).json({
       success: false,
@@ -64,43 +84,62 @@ export const login = async (req, res) => {
   }
 };
 
+
+
 export const signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    let { name, email, password } = req.body;
+
+    
+    name = name?.trim();
+    email = email?.trim().toLowerCase();
+    password = password?.trim();
 
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "all fields are required!",
+        message: "All fields are required!",
       });
     }
 
-    const existinguUser = await User.findOne({ email });
-
-    if (existinguUser) {
+    if (!isValidEmail(email)) {
       return res.status(400).json({
         success: false,
-        message: "user is already exists, plz login ",
+        message: "Invalid email format",
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "User already exists, please login",
       });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      name: name,
-      email: email,
+      name,
+      email,
       password: hashedPassword,
     });
 
-    user.password = undefined;
-
     return res.status(201).json({
-      user,
       success: true,
+      user: sanitizeUser(user),
       message: "User registered successfully",
     });
   } catch (error) {
-    console.error(error);
+    console.error("SIGNUP ERROR:", error);
 
     return res.status(500).json({
       success: false,
@@ -112,27 +151,27 @@ export const signup = async (req, res) => {
   }
 };
 
+
 export const logout = async (req, res) => {
   try {
-    // Use res.clearCookie for better readability,
-    // but ensure the options match generateCookie exactly
     return res
       .status(200)
       .clearCookie("token", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        // path: "/" // Ensure the path matches if you set one specifically before
+        sameSite:
+          process.env.NODE_ENV === "production" ? "none" : "lax",
       })
       .json({
         success: true,
-        message: "Log out successfully",
+        message: "Logged out successfully",
       });
   } catch (error) {
-    console.log(error);
-    return res.status(400).json({
+    console.error("LOGOUT ERROR:", error);
+
+    return res.status(500).json({
       success: false,
-      message: "failed to logout",
+      message: "Internal server error",
     });
   }
 };

@@ -22,13 +22,17 @@ const Signup = () => {
     setError("");
   };
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  const API_URL = `${BASE_URL}/api/auth/register`;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       setLoading(true);
 
-      await axios.post(`http://localhost:1080/api/auth/register`, {
+      await axios.post(`${API_URL}`, {
         name,
         email,
         password,

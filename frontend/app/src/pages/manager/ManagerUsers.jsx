@@ -26,10 +26,12 @@ const ManagerUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
 
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   // 🔹 API Endpoints
-  const FETCH_API_URL = "http://localhost:1080/api/profile/admin";
-  const UPDATE_API_URL =
-    "http://localhost:1080/api/profile/admin/me";
+  const FETCH_API_URL = `${BASE_URL}/api/profile/admin`;
+
+  const UPDATE_API_URL = `${BASE_URL}/api/profile/admin/me`;
 
   // 🔹 Fetch Users with Pagination
   const fetchUsers = async () => {
@@ -38,15 +40,13 @@ const ManagerUsers = () => {
 
       const response = await axios.get(
         `${FETCH_API_URL}?page=${currentPage}&limit=${usersPerPage}&search=${search}&role=${roleFilter}&status=${statusFilter}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       const data = response.data.users || [];
 
       // Managers cannot view admin profiles
-      const nonAdminUsers = data.filter(
-        (user) => user.role !== "admin"
-      );
+      const nonAdminUsers = data.filter((user) => user.role !== "admin");
 
       setUsers(nonAdminUsers);
       setTotalPages(response.data.pagination?.totalPages || 1);
@@ -94,11 +94,9 @@ const ManagerUsers = () => {
     e.preventDefault();
 
     try {
-      await axios.put(
-        `${UPDATE_API_URL}/${selectedUser._id}`,
-        formData,
-        { withCredentials: true }
-      );
+      await axios.put(`${UPDATE_API_URL}/${selectedUser._id}`, formData, {
+        withCredentials: true,
+      });
 
       alert("User updated successfully!");
       closeModal();
@@ -114,9 +112,7 @@ const ManagerUsers = () => {
       <Navbar title="Manager - View Users" />
 
       <div className="p-6 max-w-7xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">
-          All Users
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">All Users</h1>
 
         {/* 🔍 Filters */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -167,9 +163,7 @@ const ManagerUsers = () => {
 
         {/* ❌ Error State */}
         {error && (
-          <div className="bg-red-100 text-red-600 p-4 rounded-lg">
-            {error}
-          </div>
+          <div className="bg-red-100 text-red-600 p-4 rounded-lg">{error}</div>
         )}
 
         {/* 📋 Users Table */}

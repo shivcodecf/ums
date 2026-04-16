@@ -10,6 +10,11 @@ const AdminUsers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
+  // Search & Filter States
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,7 +28,11 @@ const AdminUsers = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
 
-  const API_URL = "http://localhost:1080/api/profile/admin";
+  // Add a log to see exactly what Vite sees
+  console.log("VITE_API_BASE_URL:", import.meta.env.VITE_API_BASE_URL);
+
+  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  const API_URL = `${BASE_URL}/api`;
 
   /* ---------------- Fetch Users ---------------- */
   const fetchUsers = async () => {
@@ -31,8 +40,8 @@ const AdminUsers = () => {
       setLoading(true);
 
       const res = await axios.get(
-        `${API_URL}?page=${currentPage}&limit=${usersPerPage}`,
-        { withCredentials: true }
+        `${API_URL}/profile/admin?page=${currentPage}&limit=${usersPerPage}&search=${encodeURIComponent(search)}&role=${encodeURIComponent(roleFilter)}&status=${encodeURIComponent(statusFilter)}`,
+        { withCredentials: true },
       );
 
       setUsers(res.data.users || []);
@@ -49,7 +58,7 @@ const AdminUsers = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, usersPerPage]);
+  }, [currentPage, usersPerPage, search, roleFilter, statusFilter]);
 
   /* ---------------- Pagination Handlers ---------------- */
   const nextPage = () => {
@@ -98,9 +107,9 @@ const AdminUsers = () => {
     e.preventDefault();
     try {
       await axios.put(
-        `http://localhost:1080/api/profile/admin/me/${selectedUser._id}`,
+        `${API_URL}/profile/admin/me/${selectedUser._id}`,
         formData,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       closeModal();
@@ -117,6 +126,50 @@ const AdminUsers = () => {
 
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">All Users</h1>
+
+        {/* 🔍 Search and Filters */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search by name or email"
+            className="border p-2 rounded-lg"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
+
+          {/* Role Filter */}
+          <select
+            className="border p-2 rounded-lg"
+            value={roleFilter}
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="user">User</option>
+          </select>
+
+          {/* Status Filter */}
+          <select
+            className="border p-2 rounded-lg"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
 
         {/* Loading & Error States */}
         {loading && <p>Loading users...</p>}
@@ -138,16 +191,11 @@ const AdminUsers = () => {
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr
-                      key={user._id}
-                      className="border-t hover:bg-gray-50"
-                    >
+                    <tr key={user._id} className="border-t hover:bg-gray-50">
                       <td className="p-4">{user.name}</td>
                       <td className="p-4">{user.email}</td>
                       <td className="p-4">{user.role}</td>
-                      <td className="p-4">
-                        {user.status || "active"}
-                      </td>
+                      <td className="p-4">{user.status || "active"}</td>
                       <td className="p-4 text-center">
                         <button
                           onClick={() => openModal(user)}
@@ -174,9 +222,7 @@ const AdminUsers = () => {
             <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
               {/* Rows Per Page */}
               <div className="flex items-center gap-2">
-                <label className="text-gray-600">
-                  Rows per page:
-                </label>
+                <label className="text-gray-600">Rows per page:</label>
                 <select
                   value={usersPerPage}
                   onChange={handleUsersPerPageChange}

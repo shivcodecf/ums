@@ -5,28 +5,13 @@ import { User } from "../models/user.model.js";
 
 export const getAllUsers = async (req, res) => {
   try {
-    // Extract query parameters with defaults
     let { page = 1, limit = 5, search = "", role, status } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);
 
-    // Build query object
-    const query = {
-      role: { $in: ["user", "manager"] }, // Exclude admin users
-    };
+    const query = {};
 
-    // Filter by specific role
-    if (role && role !== "all") {
-      query.role = role;
-    }
-
-    // Filter by status
-    if (status && status !== "all") {
-      query.status = status;
-    }
-
-    // Search by name or email
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: "i" } },
@@ -34,10 +19,16 @@ export const getAllUsers = async (req, res) => {
       ];
     }
 
-    // Count total matching users
+    if (role && role !== "") {
+      query.role = role;
+    }
+
+    if (status && status !== "") {
+      query.status = status;
+    }
+
     const totalUsers = await User.countDocuments(query);
 
-    // Fetch paginated users
     const users = await User.find(query)
       .select("-password")
       .sort({ createdAt: -1 })
@@ -55,14 +46,13 @@ export const getAllUsers = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Pagination Error:", error);
+    console.error("Error fetching users:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
     });
   }
 };
-
 
 // export const updateProfile = async (req, res) => {
 //   try {
@@ -194,12 +184,6 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    /**
-     * Authorization Rules:
-     * - Admin: Can update anyone.
-     * - Manager: Can update only non-admin users.
-     * - User: Can update only their own profile.
-     */
     if (loggedInUser.role === "user" && loggedInUserId !== userId) {
       return res.status(403).json({
         success: false,
@@ -214,11 +198,10 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Check for duplicate email
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ email });
       if (existingUser && existingUser._id.toString() !== userId) {
-        return res.status(400).json({
+        return res.status(409).json({
           success: false,
           message: "Email already in use",
         });
@@ -226,10 +209,8 @@ export const updateProfile = async (req, res) => {
       user.email = email;
     }
 
-    // Update fields
     if (name) user.name = name;
 
-    // Only Admin can update role and status
     if (loggedInUser.role === "admin") {
       if (role) user.role = role;
       if (status) user.status = status;
@@ -256,13 +237,20 @@ export const deleteUser = async (req, res) => {
     const userId = req.params;
 
     if (!userId) {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         message: "user is not found",
       });
     }
 
-    await User.findByIdAndDelete(userId);
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     return res.status(200).json({
       success: true,
@@ -296,7 +284,7 @@ export const createUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     if (existingUser) {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
         message: "user already exists",
       });
@@ -306,6 +294,7 @@ export const createUser = async (req, res) => {
       name: name,
       email: email,
       role: role,
+      status,
       password: hashedPassword,
     });
 
@@ -332,7 +321,7 @@ export const ownUserProfile = async (req, res) => {
     if (!id) {
       return res.status(401).json({
         success: false,
-        message: "token not found",
+        message: "Unauthorized",
       });
     }
 
@@ -349,7 +338,7 @@ export const ownUserProfile = async (req, res) => {
 
     return res.status(200).json({
       user,
-      success: false,
+      success: true,
     });
   } catch (error) {
     console.log(error);
@@ -363,20 +352,20 @@ export const ownUserProfile = async (req, res) => {
 export const updateOwnProfile = async (req, res) => {
   try {
     const { name, password, email } = req.body;
-
-    if (!name && !password) {
-      return res.status(400).json({
-        success: false,
-        message: "altleast one filed is required to update",
-      });
-    }
-
-    const  id  = req.user.id;
+    const id = req.user.id;
 
     if (!id) {
       return res.status(401).json({
         success: false,
-        message: "unauthorised access",
+        message: "Unauthorized access",
+      });
+    }
+
+    
+    if (!name && !password && !email) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one field is required to update",
       });
     }
 
@@ -385,25 +374,35 @@ export const updateOwnProfile = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "user is not found",
+        message: "User not found",
       });
     }
 
+    // Update name
     if (name) {
       user.name = name;
     }
 
+    // Update password
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
-
       user.password = hashedPassword;
     }
 
-    if (user.email) {
-      if (user.role == "user") {
+    // Update email (restricted for normal users)
+    if (email) {
+      if (user.role === "user") {
         return res.status(403).json({
           success: false,
-          message: "Access denied!",
+          message: "Access denied! Users cannot update their email.",
+        });
+      }
+
+      const existingUser = await User.findOne({ email });
+      if (existingUser && existingUser._id.toString() !== id) {
+        return res.status(400).json({
+          success: false,
+          message: "Email already in use",
         });
       }
 
@@ -412,18 +411,19 @@ export const updateOwnProfile = async (req, res) => {
 
     await user.save();
 
-    user.password = undefined;
+    const updatedUser = user.toObject();
+    delete updatedUser.password;
 
     return res.status(200).json({
-      user,
       success: true,
       message: "Profile updated successfully",
+      user: updatedUser,
     });
   } catch (error) {
-    console.log(error);
+    console.error("Update Own Profile Error:", error);
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal server error",
     });
   }
 };
