@@ -1,23 +1,68 @@
 import bcrypt from "bcryptjs";
 import { User } from "../models/user.model.js";
 
+// import { User } from "../models/user.model.js";
+
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({ role: ["user", "manager"] }).select(
-      "-password",
-    );
+    // Extract query parameters with defaults
+    let { page = 1, limit = 5, search = "", role, status } = req.query;
+
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    // Build query object
+    const query = {
+      role: { $in: ["user", "manager"] }, // Exclude admin users
+    };
+
+    // Filter by specific role
+    if (role && role !== "all") {
+      query.role = role;
+    }
+
+    // Filter by status
+    if (status && status !== "all") {
+      query.status = status;
+    }
+
+    // Search by name or email
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    // Count total matching users
+    const totalUsers = await User.countDocuments(query);
+
+    // Fetch paginated users
+    const users = await User.find(query)
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     return res.status(200).json({
       success: true,
       users,
+      pagination: {
+        totalUsers,
+        currentPage: page,
+        totalPages: Math.ceil(totalUsers / limit),
+        limit,
+      },
     });
   } catch (error) {
+    console.error("Pagination Error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
     });
   }
 };
+
 
 // export const updateProfile = async (req, res) => {
 //   try {
