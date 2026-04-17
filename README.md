@@ -13,6 +13,7 @@ It allows Admins, Managers, and Users to manage profiles, roles, and access with
 ---
 
 🧠 Features
+----
 🔐 Authentication & Authorization
 Secure login & signup
 JWT-based authentication with cookies
@@ -20,6 +21,7 @@ Role-Based Access Control (RBAC)
 
 ---
 🧑‍💼 Manager Capabilities
+---
 View users (excluding admin)
 Search & filter users
 Update non-admin user details
@@ -28,6 +30,7 @@ Cannot modify roles or admin accounts
 ---
 
 👤 User Capabilities
+---
 View own profile
 Update name & password
 Cannot change role or view other users
