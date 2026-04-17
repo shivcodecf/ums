@@ -3,6 +3,8 @@ import Navbar from "../../components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
 import { Users, UserCircle, KeyRound } from "lucide-react";
 import axios from "axios";
+import Modal from "../../components/ui/Modal";
+import Button from "../../components/ui/Button";
 
 const ManagerDashboard = () => {
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ const ManagerDashboard = () => {
       setShowProfile(true);
     } catch (error) {
       console.error("Error fetching profile:", error);
-      alert("Failed to load profile.");
+      toast.error("Failed to load profile.");
     } finally {
       setLoading(false);
     }
@@ -72,12 +74,12 @@ const ManagerDashboard = () => {
         withCredentials: true,
       });
 
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
       setIsModalOpen(false);
       fetchProfile(); // Refresh data
     } catch (error) {
       console.error("Update error:", error);
-      alert(error.response?.data?.message || "Failed to update profile.");
+      toast.error(error.response?.data?.message || "Failed to update profile.");
     }
   };
 
@@ -167,67 +169,70 @@ const ManagerDashboard = () => {
       </div>
 
       {/* Edit Profile Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
-              <div>
-                <label className="block text-gray-600 mb-1">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-600 mb-1">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-600 mb-1">New Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg"
-                  placeholder="Leave blank to keep unchanged"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-gray-300 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                >
-                  Update
-                </button>
-              </div>
-            </form>
+      <Modal isOpen={isModalOpen} onClose={closeModal} title="Edit Profile">
+        <form onSubmit={handleUpdateProfile} className="space-y-4">
+          {/* Name */}
+          <div>
+            <label className="block text-gray-600 mb-1">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            />
           </div>
-        </div>
-      )}
+
+          {/* Email */}
+          <div>
+            <label className="block text-gray-600 mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-gray-600 mb-1">New Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              placeholder="Leave blank to keep unchanged"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={closeModal}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              loading={loading}
+              loadingText="Updating..."
+            >
+              Update
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
@@ -246,9 +251,7 @@ const DashboardCard = ({ title, description, icon, onClick }) => (
 const ProfileItem = ({ label, value }) => (
   <div className="bg-gray-50 p-4 rounded-lg">
     <p className="text-gray-500 text-sm">{label}</p>
-    <p className="text-lg font-semibold text-gray-800 ">
-      {value || "N/A"}
-    </p>
+    <p className="text-lg font-semibold text-gray-800 ">{value || "N/A"}</p>
   </div>
 );
 

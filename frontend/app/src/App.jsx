@@ -11,6 +11,7 @@ import ManagerDashboard from "./pages/dashboards/ManagerDashboard";
 import ManagerUsers from "./pages/manager/ManagerUsers";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const appRouter = createBrowserRouter([
@@ -25,9 +26,9 @@ function App() {
     },
 
     {
-  path: "/",
-  element: <Home />,
-},
+      path: "/",
+      element: <Home />,
+    },
 
     // 🔐 Admin Routes
     {
@@ -87,6 +88,7 @@ function App() {
   return (
     <>
       <RouterProvider router={appRouter} />
+      <Toaster position="top-right" />
     </>
   );
 }

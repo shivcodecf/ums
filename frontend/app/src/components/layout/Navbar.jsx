@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
+import Button from "../ui/Button";
+import toast from "react-hot-toast";
 
 const Navbar = ({ title }) => {
   const navigate = useNavigate();
@@ -32,7 +34,7 @@ const Navbar = ({ title }) => {
     if (res.data.success) {
       localStorage.removeItem("user");
       localStorage.removeItem("token");
-      alert("logout successfully");
+      toast.success("Logout successfully");
       navigate("/login");
     }
   };
@@ -43,12 +45,9 @@ const Navbar = ({ title }) => {
         <h1 className="text-xl font-bold text-indigo-600">{title}</h1>
       </div>
 
-      <button
-        onClick={handleLogout}
-        className="bg-red-500 text-white px-4 py-2 rounded-lg"
-      >
+      <Button onClick={handleLogout} variant="danger" size="sm">
         Logout
-      </button>
+      </Button>
     </div>
   );
 };

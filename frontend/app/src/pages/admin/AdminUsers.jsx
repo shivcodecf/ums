@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../../components/layout/Navbar";
+import Button from "../../components/ui/Button";
+import toast from "react-hot-toast";
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -116,7 +118,7 @@ const AdminUsers = () => {
       fetchUsers();
     } catch (err) {
       console.error("Update Error:", err);
-      alert("Failed to update user.");
+      toast.error("failed to update");
     }
   };
 
@@ -323,19 +325,18 @@ const AdminUsers = () => {
               </select>
 
               <div className="flex justify-end gap-3">
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   onClick={closeModal}
-                  className="px-4 py-2 bg-gray-300 rounded"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded"
-                >
+                </Button>
+
+                <Button type="submit" variant="primary" size="sm">
                   Update
-                </button>
+                </Button>
               </div>
             </form>
           </div>

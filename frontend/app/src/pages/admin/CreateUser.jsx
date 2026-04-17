@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/layout/Navbar";
+import Button from "../../components/ui/Button";
 
 const CreateUser = () => {
   const navigate = useNavigate();
@@ -67,9 +68,7 @@ const CreateUser = () => {
       setLoading(true);
 
       await axios.post(API_URL, formData, {
-       
-        withCredentials:true
-       
+        withCredentials: true,
       });
 
       setSuccess("User created successfully!");
@@ -80,9 +79,7 @@ const CreateUser = () => {
       }, 1500);
     } catch (err) {
       console.error(err);
-      setError(
-        err.response?.data?.message || "Failed to create user."
-      );
+      setError(err.response?.data?.message || "Failed to create user.");
     } finally {
       setLoading(false);
     }
@@ -183,9 +180,7 @@ const CreateUser = () => {
                 checked={autoGeneratePassword}
                 onChange={handleAutoGenerate}
               />
-              <label className="text-gray-700">
-                Auto-generate password
-              </label>
+              <label className="text-gray-700">Auto-generate password</label>
             </div>
 
             {/* Password */}
@@ -215,13 +210,14 @@ const CreateUser = () => {
                 Cancel
               </button>
 
-              <button
+              <Button
                 type="submit"
-                disabled={loading}
-                className="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                loading={loading}
+                loadingText="Creating..."
+                size="md"
               >
-                {loading ? "Creating..." : "Create User"}
-              </button>
+                Create User
+              </Button>
             </div>
           </form>
         </div>

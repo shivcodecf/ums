@@ -98,12 +98,12 @@ const ManagerUsers = () => {
         withCredentials: true,
       });
 
-      alert("User updated successfully!");
+      toast.success("User updated successfully!");
       closeModal();
       fetchUsers();
     } catch (err) {
       console.error("Error updating user:", err);
-      alert("Failed to update user.");
+      toast.error("Failed to update user.");
     }
   };
 

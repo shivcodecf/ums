@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../../components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
+import Modal from "../../components/ui/Modal";
+import Button from "../../components/ui/Button";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -78,15 +80,15 @@ const UserDashboard = () => {
 
     try {
       await axios.put(UPDATE_API_URL, formData, {
-        withCredentials: true
+        withCredentials: true,
       });
 
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
       closeModal();
       fetchUserProfile();
     } catch (err) {
       console.error("Update error:", err);
-      alert("Failed to update profile.");
+      toast.success("Failed to update profile.");
     }
   };
 
@@ -116,11 +118,8 @@ const UserDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ProfileItem label="Name" value={user.name} />
               <ProfileItem label="Email" value={user.email} />
-              <ProfileItem label="Role" value={(user.role)} />
-              <ProfileItem
-                label="Status"
-                value={(user.status || "active")}
-              />
+              <ProfileItem label="Role" value={user.role} />
+              <ProfileItem label="Status" value={user.status || "active"} />
               <ProfileItem
                 label="Account Created"
                 value={
@@ -176,55 +175,57 @@ const UserDashboard = () => {
       </div>
 
       {/* Edit Profile Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-
-            <form onSubmit={handleUpdate} className="space-y-4">
-              <div>
-                <label className="block text-gray-600 mb-1">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-600 mb-1">New Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg"
-                  placeholder="Leave blank to keep unchanged"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 bg-gray-300 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                >
-                  Update
-                </button>
-              </div>
-            </form>
+      <Modal isOpen={isModalOpen} onClose={closeModal} title="Edit Profile">
+        <form onSubmit={handleUpdate} className="space-y-4">
+          {/* Name */}
+          <div>
+            <label className="block text-gray-600 mb-1">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            />
           </div>
-        </div>
-      )}
+
+          {/* Password */}
+          <div>
+            <label className="block text-gray-600 mb-1">New Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              placeholder="Leave blank to keep unchanged"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={closeModal}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              loading={loading}
+              loadingText="Updating..."
+            >
+              Update
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

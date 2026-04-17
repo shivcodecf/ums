@@ -9,6 +9,9 @@ import {
 } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
+import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
+import toast from "react-hot-toast";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -45,21 +48,18 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get(
-          `${API_URL}/profile/admin`,
-          { withCredentials: true }
-        );
+        const response = await axios.get(`${API_URL}/profile/admin`, {
+          withCredentials: true,
+        });
 
         const users = response.data.users || response.data;
 
         const totalUsers = users.length;
-        const admins = users.filter((u) => u.role === "admin").length+1;
+        const admins = users.filter((u) => u.role === "admin").length + 1;
         const managers = users.filter((u) => u.role === "manager").length;
-        const activeUsers = users.filter(
-          (u) => u.status === "active"
-        ).length;
+        const activeUsers = users.filter((u) => u.status === "active").length;
         const inactiveUsers = users.filter(
-          (u) => u.status === "inactive"
+          (u) => u.status === "inactive",
         ).length;
 
         setStats({
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
       setShowProfile(true);
     } catch (error) {
       console.error("Error fetching profile:", error);
-      alert("Failed to load admin profile.");
+      toast.error("Failed to load admin profile.");
     }
   };
 
@@ -113,21 +113,16 @@ const AdminDashboard = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(
-        `${API_URL}/profile/user/update`,
-        formData,
-        { withCredentials: true }
-      );
+      await axios.put(`${API_URL}/profile/user/update`, formData, {
+        withCredentials: true,
+      });
 
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully");
       setIsModalOpen(false);
       fetchAdminProfile();
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert(
-        error.response?.data?.message ||
-          "Failed to update profile."
-      );
+      toast.error(error.response?.data?.message || "Failed to update profile.");
     }
   };
 
@@ -227,18 +222,12 @@ const AdminDashboard = () => {
         {/* Admin Profile Section */}
         {showProfile && admin && (
           <div className="mt-10 bg-white shadow-md rounded-xl p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              My Profile
-            </h2>
+            <h2 className="text-xl font-semibold mb-4">My Profile</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ProfileItem label="Name" value={admin.name} />
               <ProfileItem label="Email" value={admin.email} />
-              <ProfileItem
-                label="Role"
-                value={admin.role}
-                capitalize
-              />
+              <ProfileItem label="Role" value={admin.role} capitalize />
               <ProfileItem
                 label="Status"
                 value={admin.status || "active"}
@@ -254,89 +243,86 @@ const AdminDashboard = () => {
               />
             </div>
 
-            <button
+            <Button
               onClick={() => setIsModalOpen(true)}
-              className="mt-6 bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700"
+              size="md"
+              className="mt-6"
             >
               Edit Profile
-            </button>
+            </Button>
           </div>
         )}
       </div>
 
       {/* Edit Profile Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">
-              Edit Profile
-            </h2>
-
-            <form
-              onSubmit={handleUpdateProfile}
-              className="space-y-4"
-            >
-              <div>
-                <label className="block text-gray-600 mb-1">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-600 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-600 mb-1">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg"
-                  placeholder="Leave blank to keep unchanged"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-                >
-                  Update
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Edit Profile"
+      >
+        <form onSubmit={handleUpdateProfile} className="space-y-4">
+          {/* Name */}
+          <div>
+            <label className="block text-gray-600 mb-1">Name</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            />
           </div>
-        </div>
-      )}
+
+          {/* Email */}
+          <div>
+            <label className="block text-gray-600 mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              required
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block text-gray-600 mb-1">New Password</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full border p-2 rounded-lg"
+              placeholder="Leave blank to keep unchanged"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              loading={loading}
+              loadingText="Updating..."
+            >
+              Update
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
@@ -348,9 +334,7 @@ const StatCard = ({ title, value, icon, color }) => (
       <p className="text-gray-500 text-sm">{title}</p>
       <h2 className="text-2xl font-bold text-gray-800">{value}</h2>
     </div>
-    <div className={`${color} text-white p-3 rounded-lg`}>
-      {icon}
-    </div>
+    <div className={`${color} text-white p-3 rounded-lg`}>{icon}</div>
   </div>
 );
 
@@ -362,9 +346,7 @@ const ActionCard = ({ title, description, icon, onClick }) => (
   >
     <div className="text-indigo-600 mb-3">{icon}</div>
     <h3 className="text-lg font-semibold">{title}</h3>
-    <p className="text-gray-500 text-sm mt-1">
-      {description}
-    </p>
+    <p className="text-gray-500 text-sm mt-1">{description}</p>
   </div>
 );
 
@@ -372,9 +354,7 @@ const ActionCard = ({ title, description, icon, onClick }) => (
 const ProfileItem = ({ label, value }) => (
   <div className="bg-gray-50 p-4 rounded-lg">
     <p className="text-gray-500 text-sm">{label}</p>
-    <p className="text-lg font-semibold text-gray-800">
-      {value || "N/A"}
-    </p>
+    <p className="text-lg font-semibold text-gray-800">{value || "N/A"}</p>
   </div>
 );
 

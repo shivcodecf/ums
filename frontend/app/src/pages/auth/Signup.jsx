@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Button from "../../components/ui/Button";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -38,7 +40,7 @@ const Signup = () => {
         password,
       });
 
-      alert("Account created successfully!");
+      toast.success("signup successfully!");
       navigate("/login");
     } catch (err) {
       setError(
@@ -119,13 +121,14 @@ const Signup = () => {
               required
             />
 
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition duration-200"
+              loading={loading}
+              loadingText="Creating Account..."
+              fullWidth
             >
-              {loading ? "Creating Account..." : "Sign Up"}
-            </button>
+              Sign Up
+            </Button>
           </form>
 
           <p className="text-sm text-center text-gray-600 mt-4">

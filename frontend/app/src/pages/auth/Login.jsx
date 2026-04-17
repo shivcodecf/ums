@@ -1,6 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import Button from "../../components/ui/Button";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -31,7 +33,7 @@ const Login = () => {
             id: res.data.user._id,
           }),
         );
-        alert("Login Successful!");
+        toast.success("logged In successfully!");
       }
 
       // window.location.href = "/dashboard";
@@ -44,7 +46,7 @@ const Login = () => {
         navigate("/user");
       }
     } catch (error) {
-      alert(error.response?.data?.message || "Login failed");
+      toast.error(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -91,13 +93,9 @@ const Login = () => {
               onChange={handleChange}
             />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition duration-200"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
+            <Button type="submit" loading={loading} fullWidth>
+              Login
+            </Button>
           </form>
 
           <p className="text-sm text-center text-gray-600 mt-4">
