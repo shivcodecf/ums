@@ -121,7 +121,7 @@ User	Manage own profile
 1️⃣ Clone Repository
 
 ```
-https://github.com/shivcodecf/ums.git
+git clone https://github.com/shivcodecf/ums.git
 
 cd ums
 
