@@ -191,6 +191,18 @@ npm run dev
 
 ```
 ---
+
+## 🔑 Demo Credentials
+---
+### Admin
+Email: admin@gmail.com  
+Password: admin123  
+---
+### Manager
+Email: manager@gamil.com  
+Password: manager123  
+---
+
 🔥 Key Highlights
 ---
 Server-side pagination
