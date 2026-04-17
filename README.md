@@ -184,6 +184,7 @@ npm run dev
 ```
 ---
 🔥 Key Highlights
+---
 Server-side pagination
 Search & filtering
 RBAC implementation
@@ -194,6 +195,7 @@ Clean folder structure
 ---
 
 🧠 Learnings
+---
 Implemented role-based authorization
 Built reusable UI system (Button, Modal)
 Managed authentication with cookies & JWT
@@ -202,6 +204,7 @@ Handled deployment issues (CORS, cookies)
 ---
 
 🚀 Future Improvements
+---
 Advanced search (debounce)
 Analytics dashboard
 Password reset system
@@ -214,6 +217,7 @@ Dark mode
 Shivam Yadav
 
 GitHub: https://github.com/shivcodecf
+---
 LinkedIn: https://www.linkedin.com/in/shivam-yadav-620a03232/
 
 ---
