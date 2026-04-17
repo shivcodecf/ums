@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../../components/layout/Navbar";
 import { Pencil } from "lucide-react";
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
+
 
 const ManagerUsers = () => {
   const [users, setUsers] = useState([]);
