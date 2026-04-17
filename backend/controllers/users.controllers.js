@@ -176,7 +176,7 @@ export const updateProfile = async (req, res) => {
     const loggedInUserId = loggedInUser._id?.toString() || loggedInUser.id;
 
     // Find target user
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("-password");
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -217,6 +217,7 @@ export const updateProfile = async (req, res) => {
     }
 
     await user.save();
+    // user.password = undefined;
 
     return res.status(200).json({
       success: true,

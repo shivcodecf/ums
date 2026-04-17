@@ -5,6 +5,7 @@ import { Users, UserCircle, KeyRound } from "lucide-react";
 import axios from "axios";
 import Modal from "../../components/ui/Modal";
 import Button from "../../components/ui/Button";
+import toast from "react-hot-toast";
 
 const ManagerDashboard = () => {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ const ManagerDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [manager, setManager] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  
 
   const [formData, setFormData] = useState({
     name: "",
@@ -69,17 +72,21 @@ const ManagerDashboard = () => {
   // Update Profile
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    setUpdateLoading(true);
+
     try {
       await axios.put(`${API_URL}/profile/user/update`, formData, {
         withCredentials: true,
       });
 
       toast.success("Profile updated successfully!");
-      setIsModalOpen(false);
-      fetchProfile(); // Refresh data
+      setIsModalOpen(false); // ✅ close modal first
+      fetchProfile(); // then refresh
     } catch (error) {
       console.error("Update error:", error);
       toast.error(error.response?.data?.message || "Failed to update profile.");
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -222,11 +229,12 @@ const ManagerDashboard = () => {
             </Button>
 
             <Button
-              type="submit"
+              type="button" // ✅ FIX
               variant="primary"
               size="sm"
-              loading={loading}
+              loading={updateLoading}
               loadingText="Updating..."
+              onClick={handleUpdateProfile} // ✅ trigger manually
             >
               Update
             </Button>

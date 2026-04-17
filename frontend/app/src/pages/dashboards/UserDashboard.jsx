@@ -4,16 +4,22 @@ import Navbar from "../../components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
 import Modal from "../../components/ui/Modal";
 import Button from "../../components/ui/Button";
+import toast from "react-hot-toast";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+
+  // ✅ Separate loading states
+  const [loading, setLoading] = useState(true); // page loading
+  const [updateLoading, setUpdateLoading] = useState(false); // form loading
+
   const [error, setError] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     password: "",
@@ -24,9 +30,11 @@ const UserDashboard = () => {
   const API_URL = `${BASE_URL}/api/profile/user`;
   const UPDATE_API_URL = `${BASE_URL}/api/profile/user/update`;
 
-  // Fetch user profile
+  // 🔹 Fetch profile
   const fetchUserProfile = async () => {
     try {
+      setLoading(true);
+
       const response = await axios.get(API_URL, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -35,6 +43,7 @@ const UserDashboard = () => {
       });
 
       const userData = response.data.user || response.data;
+
       setUser(userData);
       setFormData({
         name: userData.name || "",
@@ -52,7 +61,7 @@ const UserDashboard = () => {
     fetchUserProfile();
   }, []);
 
-  // Open modal
+  // 🔹 Open modal
   const openModal = () => {
     setFormData({
       name: user.name,
@@ -61,12 +70,12 @@ const UserDashboard = () => {
     setIsModalOpen(true);
   };
 
-  // Close modal
+  // 🔹 Close modal
   const closeModal = () => {
     setIsModalOpen(false);
   };
 
-  // Handle input change
+  // 🔹 Handle input change
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -74,21 +83,26 @@ const UserDashboard = () => {
     });
   };
 
-  // Update profile
+  // 🔹 Update profile
   const handleUpdate = async (e) => {
     e.preventDefault();
 
     try {
+      setUpdateLoading(true);
+
       await axios.put(UPDATE_API_URL, formData, {
         withCredentials: true,
       });
 
       toast.success("Profile updated successfully!");
-      closeModal();
-      fetchUserProfile();
+
+      closeModal();              // ✅ FIXED
+      fetchUserProfile();        // refresh data
     } catch (err) {
       console.error("Update error:", err);
-      toast.success("Failed to update profile.");
+      toast.error("Failed to update profile"); // ✅ FIXED
+    } finally {
+      setUpdateLoading(false);
     }
   };
 
@@ -101,16 +115,21 @@ const UserDashboard = () => {
           Welcome to Your Dashboard 👋
         </h1>
 
+        {/* Loading */}
         {loading && (
           <div className="text-center text-lg font-medium">
             Loading profile...
           </div>
         )}
 
+        {/* Error */}
         {error && (
-          <div className="bg-red-100 text-red-600 p-4 rounded-lg">{error}</div>
+          <div className="bg-red-100 text-red-600 p-4 rounded-lg">
+            {error}
+          </div>
         )}
 
+        {/* Profile */}
         {!loading && !error && user && (
           <div className="bg-white shadow-md rounded-xl p-6">
             <h2 className="text-xl font-semibold mb-4">My Profile</h2>
@@ -138,46 +157,20 @@ const UserDashboard = () => {
               />
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-4 mt-6">
-              <button
-                onClick={openModal}
-                className="bg-indigo-600 text-white px-5 py-2 rounded-lg hover:bg-indigo-700"
-              >
+            {/* Action */}
+            <div className="flex gap-4 mt-6">
+              <Button onClick={openModal} size="md">
                 Edit Profile
-              </button>
-
-              {/* <button
-                onClick={() => navigate("/user/change-password")}
-                className="bg-gray-800 text-white px-5 py-2 rounded-lg hover:bg-gray-900"
-              >
-                Change Password
-              </button> */}
+              </Button>
             </div>
           </div>
         )}
-
-        {/* Quick Actions */}
-        {/* {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <DashboardCard
-              title="View Profile"
-              description="Check your personal details"
-              onClick={openModal}
-            />
-            <DashboardCard
-              title="Update Password"
-              description="Keep your account secure"
-              onClick={() => navigate("/user/change-password")}
-            />
-          </div>
-        )} */}
       </div>
 
-      {/* Edit Profile Modal */}
+      {/* 🔥 Modal */}
       <Modal isOpen={isModalOpen} onClose={closeModal} title="Edit Profile">
         <form onSubmit={handleUpdate} className="space-y-4">
-          {/* Name */}
+
           <div>
             <label className="block text-gray-600 mb-1">Name</label>
             <input
@@ -190,7 +183,6 @@ const UserDashboard = () => {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-gray-600 mb-1">New Password</label>
             <input
@@ -203,7 +195,6 @@ const UserDashboard = () => {
             />
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
             <Button
               type="button"
@@ -218,7 +209,7 @@ const UserDashboard = () => {
               type="submit"
               variant="primary"
               size="sm"
-              loading={loading}
+              loading={updateLoading}   // ✅ FIXED
               loadingText="Updating..."
             >
               Update
@@ -233,21 +224,10 @@ const UserDashboard = () => {
 const ProfileItem = ({ label, value }) => (
   <div className="bg-gray-50 p-4 rounded-lg">
     <p className="text-gray-500 text-sm">{label}</p>
-    <p className="text-lg font-semibold text-gray-800">{value || "N/A"}</p>
+    <p className="text-lg font-semibold text-gray-800">
+      {value || "N/A"}
+    </p>
   </div>
 );
-
-const DashboardCard = ({ title, description, onClick }) => (
-  <div
-    onClick={onClick}
-    className="bg-white shadow-md rounded-xl p-6 cursor-pointer hover:shadow-lg transition"
-  >
-    <h3 className="text-lg font-semibold">{title}</h3>
-    <p className="text-gray-500 mt-2">{description}</p>
-  </div>
-);
-
-const capitalize = (text) =>
-  text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
 
 export default UserDashboard;
