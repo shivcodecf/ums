@@ -142,10 +142,10 @@ npm install
 Create .env:
 
 ```
-PORT=
-JWT_SECRET=
-MONGO_URI=
-FRONTEND_URL=
+PORT=1080
+JWT_SECRET=your_secret_key
+MONGO_URI=your_mongodb_uri
+FRONTEND_URL=your_frontned_url
 
 ```
 
@@ -170,7 +170,7 @@ npm install
 Create .env:
 
 ```
-VITE_API_BASE_URL=
+VITE_API_BASE_URL=your_backend_url
 
 ```
 
